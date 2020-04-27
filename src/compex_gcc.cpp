@@ -27,7 +27,6 @@
  *     information should be dumped. Structures are not dumped by default.
  *
  */
-#include "config.h"
 #include "gcc-plugin.h"
 #include "tree.h"
 #include "cp/cp-tree.h"
@@ -129,7 +128,7 @@ const char *_mangle_typename(tree type) {
     case RECORD_TYPE:
       name[0] = 's';
       name[1] = '_';
-      strncpy(name+2, IDENTIFIER_POINTER(DECL_NAME(TYPE_NAME(type))), MANGLE_STR_LEN-2);
+      strncpy(name+2, IDENTIFIER_POINTER(TYPE_NAME(type)), MANGLE_STR_LEN-2);
       break;
     default:
       sprintf(name, "unknown_%u", ++unk_i);
@@ -177,7 +176,7 @@ _finish_type(void *event_data, void *data) {
   }
 
   tree decl = TYPE_NAME(type);
-  const char *struct_name = IDENTIFIER_POINTER(DECL_NAME(decl));
+  const char *struct_name = IDENTIFIER_POINTER(decl);
   const char *field_name;
   tree sizeof_const, offset_const, boffset_const, oalign_const;
   tree fdeclname;
@@ -186,8 +185,8 @@ _finish_type(void *event_data, void *data) {
   char fnamebuf[64];
 
   OUTF("%s: &%s !compex/struct\n", struct_name, _mangle_typename_def(type));
-  OUTF("  $srcFile: %s\n", DECL_SOURCE_FILE(decl));
-  OUTF("  $srcLine: %u\n", DECL_SOURCE_LINE(decl));
+  // OUTF("  $srcFile: %s\n", DECL_SOURCE_FILE(decl));
+  // OUTF("  $srcLine: %u\n", DECL_SOURCE_LINE(decl));
 
   sizeof_v = (tree_fits_shwi_p(TYPE_SIZE(type)) ? tree_to_shwi(TYPE_SIZE(type)) : -1);
   OUTF("  $sizeof: %u\n", sizeof_v);
@@ -200,7 +199,7 @@ _finish_type(void *event_data, void *data) {
   size_t n = biv ? BINFO_N_BASE_BINFOS(biv) : 0;
   for (size_t i=0;i<n;++i) {
     bi = BINFO_BASE_BINFO(biv,i);
-    OUTF("  base_%u$: !compex/base\n", i);
+    OUTF("  base_%lu$: !compex/base\n", i);
 
     OUTF("    access: %s\n",
       _access_to_str(BINFO_BASE_ACCESSES(biv) ? BINFO_BASE_ACCESS(biv, i) : access_public_node));
@@ -241,7 +240,7 @@ _finish_type(void *event_data, void *data) {
         OUTF("    align: %d\n", DECL_ALIGN(arg));
         OUTF("    offset: %u\n", offset_v);
         OUTF("    boffset: %u\n", boffset_v);
-        OUTF("    oalign: %u\n", DECL_OFFSET_ALIGN(arg));
+        OUTF("    oalign: %lu\n", DECL_OFFSET_ALIGN(arg));
         if (DECL_ARTIFICIAL(arg))
           OUTF("    artificial: true\n");
         if (!fdeclname)
@@ -271,6 +270,7 @@ _finish_type(void *event_data, void *data) {
     OUTF("  method_%u$: !compex/method\n", i);
     OUTF("    name: %s\n", method_name);
     OUTF("    asm: %s\n", mangled_name);
+    #if 0
     if (DECL_VIRTUAL_P(arg))
       OUTF("    virtual: true\n");
     if (DECL_ARTIFICIAL(arg))
@@ -299,6 +299,7 @@ _finish_type(void *event_data, void *data) {
       OUTF("    thunk: true\n");
     if (TYPE_NOTHROW_P(TREE_TYPE(arg)))
       OUTF("    nothrow: true\n");
+    #endif
     _dump_tags(TREE_TYPE(arg), 2);
   }
 }

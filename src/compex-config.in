@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # compex-config
 # -------------
@@ -27,7 +27,8 @@ CLANG_OUTPUT_ARG=
 GCC_ALL_ARG=
 CLANG_ALL_ARG=
 
-while (( "$#" )); do
+while [ -n "$1" ]; do
+  echo $1
   case "$1" in
     '--gcc')    MODE=gcc   ;;
     '--clang')  MODE=clang ;;
