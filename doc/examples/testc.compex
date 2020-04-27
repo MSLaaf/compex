@@ -1,0 +1,13 @@
+foo: &s_foo !compex/struct
+  $sizeof: 32
+  $alignof: 32
+  tags:
+    -
+      - x
+  x: !compex/field
+    name: x
+    size: 32
+    align: 32
+    offset: 0
+    boffset: 0
+    oalign: 128
